@@ -25,23 +25,30 @@ app = Flask(__name__, template_folder='')
 def home():
     return render_template("index.html")
 
+logged_in = False
 email = ""
 password = ""
 token = ""
+
 @app.route("/static/login", methods=["POST", "GET"])
 def login():
     if request.method == "POST":
+        global email
         email = request.form["email"]
+        global password
         password = request.form["password"]
         checker = 0
         try:
             user = auth.sign_in_with_email_and_password(email, password)
             checker = 1
+            global logged_in
+            logged_in = True
         except:
             checker = 0
         if checker == 1:
+            global token
             token = user["localId"]
-            return "<h1>HEllo</h1>"
+            return redirect("/static/main_info")
         else:
             return render_template("static/login_fail.html")
         #return redirect("/{0}".format(user))
@@ -56,17 +63,22 @@ def login():
 @app.route("/static/register", methods=["POST", "GET"])
 def register():
     if request.method == "POST":
+        global email
         email = request.form["email"]
+        global password
         password = request.form["password"]
         checker = 0
         try:
             user = auth.create_user_with_email_and_password(email, password)
             checker = 1
+            global logged_in
+            logged_in = True
         except:
             checker = 0
         if checker == 1:
+            global token
             token = user["localId"]
-            return "<h1>HEllo</h1>"
+            return redirect("/static/main_info")
         else:
             return render_template("static/register_fail.html")
     else:
@@ -90,5 +102,13 @@ def reset_password():
     else:
         return render_template("static/reset_password.html")
 
+@app.route("/static/main_info")
+def main_info():
+    print email
+    if logged_in == False:
+        return redirect("/static/login")
+    else:
+        return render_template("static/main_info.html", email = email.split('@')[0])
+
 if __name__ == "__main__":
-    app.run(host='127.0.0.1', port='12345')
+    app.run(host='192.168.1.29', port='12345')
