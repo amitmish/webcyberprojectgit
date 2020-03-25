@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for, render_template, request
+from flask import Flask, redirect, url_for, render_template, request, session
 import sys
 import pyrebase
 import random
@@ -20,34 +20,29 @@ db = firebase.database()
 # Get a reference to the auth service
 auth = firebase.auth()
 app = Flask(__name__, template_folder='')
+app.secret_key = "any random string"
 
 @app.route("/")
 def home():
     return render_template("index.html")
 
-logged_in = False
-email = ""
-password = ""
-token = ""
-
 @app.route("/static/login", methods=["POST", "GET"])
 def login():
     if request.method == "POST":
-        global email
         email = request.form["email"]
-        global password
         password = request.form["password"]
         checker = 0
         try:
             user = auth.sign_in_with_email_and_password(email, password)
+            session["email"] = email
+            session["password"] = password
+            session["logged_in"] = True
             checker = 1
-            global logged_in
             logged_in = True
         except:
             checker = 0
         if checker == 1:
-            global token
-            token = user["localId"]
+            session["token"] = user["localId"]
             return redirect("/static/main_info")
         else:
             return render_template("static/login_fail.html")
@@ -104,11 +99,10 @@ def reset_password():
 
 @app.route("/static/main_info")
 def main_info():
-    print email
-    if logged_in == False:
+    if session.get("logged_in") == None or session.get("logged_in") == False:
         return redirect("/static/login")
     else:
-        return render_template("static/main_info.html", email = email.split('@')[0])
+        return render_template("static/main_info.html", email = session.get('email').split('@')[0])
 
 if __name__ == "__main__":
-    app.run(host='192.168.1.29', port='12345')
+    app.run(host='192.168.1.29', port='12345', threaded=True)
