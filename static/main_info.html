@@ -1,55 +1,109 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-  	<title>Sidebar 09</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<head>
+	<title>Login V1</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--===============================================================================================-->
+	<link rel="icon" type="image/png" href="{{ url_for('static', filename='auth/images/icons/favicon.ico') }}"/>
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='auth/vendor/bootstrap/css/bootstrap.min.css') }}">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='auth/fonts/font-awesome-4.7.0/css/font-awesome.min.css') }}">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='auth/vendor/animate/animate.css') }}">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='auth/vendor/css-hamburgers/hamburgers.min.css') }}">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='auth/vendor/select2/select2.min.css') }}">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='auth/css/util.css') }}">
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='auth/css/main.css') }}">
+<!--===============================================================================================-->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {
+  font-family: "Lato", sans-serif;
+}
 
-    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900" rel="stylesheet">
-		
-		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-		<link rel="stylesheet" href="{{ url_for('static', filename='main/css/style.css') }}">
-  </head>
-  <body>
-		
-		<div class="wrapper d-flex align-items-stretch">
-			<nav id="sidebar">
-				<div class="custom-menu">
-					<button type="button" id="sidebarCollapse" class="btn btn-primary">
-	        </button>
-        </div>
-	  		<div class="img bg-wrap text-center py-4" style="background-color: #ff9999;">
-	  			<div class="user-logo">
-	  				<h3>{{ email }}</h3>
-	  			</div>
-	  		</div>
-        <ul class="list-unstyled components mb-5">
-          <li class="active">
-            <a href="{{ url_for('static', filename='main_info') }}" style="background-color: #dadbfc"><span class="fa fa-cog mr-3"></span> User Info</a>
-          </li>
-          <li>
-            <a href="#"><span class="fa fa-support mr-3"></span> Create Room</a>
-          </li>
-          <li>
-            <a href="#"><span class="fa fa-trophy mr-3"></span> Join Room</a>
-          </li>
-            <br><br><br>
-            <h5 style="text-align:center; color: white;">Cyber Project<br>Amit Finkel</h5>
-        </ul>
+.mainBox {
+  width: 960px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 70px 130px 33px 95px;
+  text-align: center;
+}
 
-    	</nav>
+.sidenav {
+  height: 100%;
+  width: 250px;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: #111;
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 60px;
+}
 
-        <!-- Page Content  -->
-      <div id="content" class="p-4 p-md-5 pt-5">
-        <h2 class="mb-4">Welcome, {{ email }}</h2>
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-      </div>
+.sidenav a {
+  padding: 8px 8px 8px 32px;
+  text-decoration: none;
+  font-size: 25px;
+  color: #818181;
+  display: block;
+  transition: 0.3s;
+}
+
+.sidenav a:hover {
+  color: #f1f1f1;
+}
+
+.sidenav .closebtn {
+  position: absolute;
+  top: 0;
+  right: 25px;
+  font-size: 36px;
+  margin-left: 50px;
+}
+
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+</style>
+</head>
+<body>
+	<div class="limiter">
+		<div class="container-login100" style="background: #ffa64d">
+			<div id="mySidenav" class="sidenav">
+				<br><br>
+				<div style="width: 250px; font-family:Monospace; font-size: 20px; text-align:center; color:white"><span>amitfinkel100</span></div>
+				<br><br><br>
+			  <a href="#">About</a>
+			  <a href="#">Services</a>
+			  <a href="#">Clients</a>
+			  <a href="#">Contact</a>
+				<br><br><br><br>
+			</div>
+
+
+			<div class="mainBox">
+				<h1>Welcome, {{ email }}</h1>
+				<br><br>
+				<h3 style="text-align: left; color: #ff5050"><span style="font-size: 25px; color:purple; font-size: 40px">User Info:</span><br><br>Game Room: {{ game_room }}<br><br>Points: {{ points }}</h3>
+				<br><br>
+				<div class="container-login100-form-btn" style="width:50%">
+					<button class="login100-form-btn" onclick="window.location.href='{{ url_for('static', filename='reset_password') }}'">
+						Reset Password
+					</button>
+				</div>
+			</div>
 		</div>
+	</div>
 
-    <script src="{{ url_for('static', filename='main/js/jquery.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='main/js/popper.js') }}"></script>
-    <script src="{{ url_for('static', filename='main/js/bootstrap.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='main/js/main.js') }}"></script>
-  </body>
+
+
+</body>
 </html>

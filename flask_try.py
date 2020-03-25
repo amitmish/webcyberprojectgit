@@ -58,21 +58,19 @@ def login():
 @app.route("/static/register", methods=["POST", "GET"])
 def register():
     if request.method == "POST":
-        global email
         email = request.form["email"]
-        global password
         password = request.form["password"]
         checker = 0
         try:
             user = auth.create_user_with_email_and_password(email, password)
             checker = 1
-            global logged_in
-            logged_in = True
+            session["email"] = email
+            session["password"] = password
+            session["logged_in"] = True
         except:
             checker = 0
         if checker == 1:
-            global token
-            token = user["localId"]
+            session["token"] = user["localId"]
             return redirect("/static/main_info")
         else:
             return render_template("static/register_fail.html")
@@ -88,6 +86,10 @@ def reset_password():
         try:
             user = auth.send_password_reset_email(email)
             checker = 1
+            session["email"] = ""
+            session["password"] = ""
+            session["logged_in"] = False
+            session["token"] = ""
         except:
             checker = 0
         if checker == 1:
@@ -102,7 +104,9 @@ def main_info():
     if session.get("logged_in") == None or session.get("logged_in") == False:
         return redirect("/static/login")
     else:
-        return render_template("static/main_info.html", email = session.get('email').split('@')[0])
+        game_room = db.child("users").child(session.get('token')).child("game room").get().val()
+        points = db.child("users").child(session.get('token')).child("points").get().val()
+        return render_template("static/main_info.html", email = session.get('email').split('@')[0], game_room = game_room, points = points)
 
 if __name__ == "__main__":
-    app.run(host='192.168.1.29', port='12345', threaded=True)
+    app.run(host='192.168.1.29', port='12345')
