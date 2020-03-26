@@ -3,6 +3,7 @@ import sys
 import pyrebase
 import random
 import time
+from server_functions import *
 
 config = {
     "apiKey": "AIzaSyC3FBTMBznkfl9flr0OGzw4DLpsEMWcbms",
@@ -116,10 +117,13 @@ def main_join():
         if request.method == "GET":
             return render_template("static/main_join.html", email = session.get('email').split('@')[0], error = "")
         else:
-            if db.child("rooms").child(session.get("game_room")).child("started").get().val() == 0:
-                data = {"email": email, "game room": session.get("game_room"),
-                        "points": db.child("users").child(session.get("token")).child("points").get().val()}
-                db.child(session.get("token")).set(data)
+            token = session.get("token")
+            email = session.get("email")
+            game_room = request.form["game_room"]
+            if db.child("rooms").child(game_room).child("started").get().val() == 0:
+                data = {"email": email, "game room": game_room,
+                        "points": db.child("users").child(token).child("points").get().val()}
+                db.child(token).set(data)
                 return "<h1>HEllo</h1>"
             else:
                 return render_template("static/main_join.html", email = session.get('email').split('@')[0], error = "Wrong Game Room")

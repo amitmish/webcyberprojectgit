@@ -76,7 +76,7 @@ body {
 </head>
 <body>
 	<div class="limiter">
-		<div class="container-login100" style="background: #ffa64d">
+		<div class="container-login100" style="background: #e6e600">
 			<div id="mySidenav" class="sidenav">
 				<br><br>
 				<div style="width: 250px; font-family:Monospace; font-size: 20px; text-align:center; color:white"><span>{{ email }}</span></div>
@@ -88,15 +88,18 @@ body {
 				<br><br><br><br>
 			</div>
 
-            <form class="" action="#" method="post">
-                <div class="mainBox">
-                    <div class="container-login100-form-btn" style="width:50%">
-                        <button class="login100-form-btn" onclick="window.location.href='{{ url_for('static', filename='reset_password') }}'">
-                            Join Game Room
-                        </button>
-                    </div>
-                </div>
-            </form>
+
+			<div class="mainBox">
+				<form class="" action="#" method="post">
+					<h1>Generate New Game Room</h1>
+					<br><br>
+						<div class="container-login100-form-btn" style="width:100%">
+							<button style="background-color:blue" class="login100-form-btn" onclick="window.location.href='{{ url_for('static', filename='reset_password') }}'">
+								Generate
+							</button>
+						</div>
+				</form>
+			</div>
 		</div>
 	</div>
 
