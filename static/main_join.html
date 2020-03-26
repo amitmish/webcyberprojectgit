@@ -76,13 +76,13 @@ body {
 </head>
 <body>
 	<div class="limiter">
-		<div class="container-login100" style="background: #ffa64d">
+		<div class="container-login100" style="background: #9966ff">
 			<div id="mySidenav" class="sidenav">
 				<br><br>
 				<div style="width: 250px; font-family:Monospace; font-size: 20px; text-align:center; color:white"><span>{{ email }}</span></div>
 				<br><br><br>
-			  <a href="{{ url_for('static', filename='main_info') }}" style="color:white">User Info</a>
-			  <a href="{{ url_for('static', filename='main_join') }}">Join Room</a>
+			  <a href="{{ url_for('static', filename='main_info') }}">User Info</a>
+			  <a href="{{ url_for('static', filename='main_join') }}" style="color:white">Join Room</a>
 			  <a href="{{ url_for('static', filename='main_create') }}">Create Room</a>
 			  <a href="{{ url_for('static', filename='login') }}">Sign Out</a>
 				<br><br><br><br>
@@ -90,15 +90,23 @@ body {
 
 
 			<div class="mainBox">
-				<h1>Welcome, {{ email }}</h1>
-				<br><br>
-				<h3 style="text-align: left; color: #ff5050"><span style="font-size: 25px; color:purple; font-size: 40px">User Info:</span><br><br>Game Room: {{ game_room }}<br><br>Points: {{ points }}</h3>
-				<br><br>
-				<div class="container-login100-form-btn" style="width:50%">
-					<button class="login100-form-btn" onclick="window.location.href='{{ url_for('static', filename='reset_password') }}'">
-						Reset Password
-					</button>
-				</div>
+                <form class="" action="#" method="post">
+					<span class="login100-form-title" style="text-align: center">
+						Join Game Room
+					</span>
+
+					<div class="wrap-input100 validate-input" data-validate = "Valid email is required: ex@abc.xyz">
+						<input class="input100" style="text-align:center; padding: 0 0 0 0;" type="text" name="email" placeholder="Room PIN">
+						<span class="focus-input100"></span>
+					</div>
+
+					<h4 style="text-align:center; color: red;">{{ error }}</h4>
+					<div class="container-login100-form-btn" style="width:100%">
+						<button style="text-align:center" class="login100-form-btn" onclick="window.location.href='{{ url_for('static', filename='reset_password') }}'">
+							Join
+						</button>
+					</div>
+                </form>
 			</div>
 		</div>
 	</div>

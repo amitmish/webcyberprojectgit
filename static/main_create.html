@@ -81,25 +81,22 @@ body {
 				<br><br>
 				<div style="width: 250px; font-family:Monospace; font-size: 20px; text-align:center; color:white"><span>{{ email }}</span></div>
 				<br><br><br>
-			  <a href="{{ url_for('static', filename='main_info') }}" style="color:white">User Info</a>
+			  <a href="{{ url_for('static', filename='main_info') }}">User Info</a>
 			  <a href="{{ url_for('static', filename='main_join') }}">Join Room</a>
-			  <a href="{{ url_for('static', filename='main_create') }}">Create Room</a>
+			  <a href="{{ url_for('static', filename='main_create') }}" style="color:white">Create Room</a>
 			  <a href="{{ url_for('static', filename='login') }}">Sign Out</a>
 				<br><br><br><br>
 			</div>
 
-
-			<div class="mainBox">
-				<h1>Welcome, {{ email }}</h1>
-				<br><br>
-				<h3 style="text-align: left; color: #ff5050"><span style="font-size: 25px; color:purple; font-size: 40px">User Info:</span><br><br>Game Room: {{ game_room }}<br><br>Points: {{ points }}</h3>
-				<br><br>
-				<div class="container-login100-form-btn" style="width:50%">
-					<button class="login100-form-btn" onclick="window.location.href='{{ url_for('static', filename='reset_password') }}'">
-						Reset Password
-					</button>
-				</div>
-			</div>
+            <form class="" action="#" method="post">
+                <div class="mainBox">
+                    <div class="container-login100-form-btn" style="width:50%">
+                        <button class="login100-form-btn" onclick="window.location.href='{{ url_for('static', filename='reset_password') }}'">
+                            Join Game Room
+                        </button>
+                    </div>
+                </div>
+            </form>
 		</div>
 	</div>
 

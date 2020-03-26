@@ -108,5 +108,45 @@ def main_info():
         points = db.child("users").child(session.get('token')).child("points").get().val()
         return render_template("static/main_info.html", email = session.get('email').split('@')[0], game_room = game_room, points = points)
 
+@app.route("/static/main_join", methods=["POST", "GET"])
+def main_join():
+    if session.get("logged_in") == None or session.get("logged_in") == False:
+        return redirect("/static/login")
+    else:
+        if request.method == "GET":
+            return render_template("static/main_join.html", email = session.get('email').split('@')[0], error = "")
+        else:
+            if db.child("rooms").child(session.get("game_room")).child("started").get().val() == 0:
+                data = {"email": email, "game room": session.get("game_room"),
+                        "points": db.child("users").child(session.get("token")).child("points").get().val()}
+                db.child(session.get("token")).set(data)
+                return "<h1>HEllo</h1>"
+            else:
+                return render_template("static/main_join.html", email = session.get('email').split('@')[0], error = "Wrong Game Room")
+
+@app.route("/static/main_create", methods=["POST", "GET"])
+def main_create():
+    if session.get("logged_in") == None or session.get("logged_in") == False:
+        return redirect("/static/login")
+    else:
+        if request.method == "GET":
+            return render_template("static/main_create.html", email = session.get('email').split('@')[0], error = "")
+        else:
+            token = session.get("token")
+            email = session.get("email")
+            game_room = random.randint(1, 10000)
+            found_code = False
+            while found_code == False:
+                if db.child("rooms").child(game_room).child("started").get().val() == 1:
+                    game_room = random.randint(1, 10000)
+                else:
+                    found_code = True
+            data = {"email": email, "game room": game_room,
+                    "points": db.child("users").child(token).child("points").get().val()}
+            db.child("users").child(token).set(data)
+            questions = {"admin": token, "started": 0, "finished": 0, "q1": get_random_int(), "q2": get_random_int(), "q3": get_random_int(), "best score": 1000, "best player": "none"}
+            db.child("rooms").child(game_room).set(questions)
+            return "<h1>HEllo</h1>"
+
 if __name__ == "__main__":
     app.run(host='192.168.1.29', port='12345')
