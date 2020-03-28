@@ -4,6 +4,8 @@ import pyrebase
 import random
 import time
 from server_functions import *
+import thread
+import threading
 
 config = {
     "apiKey": "AIzaSyC3FBTMBznkfl9flr0OGzw4DLpsEMWcbms",
@@ -72,6 +74,8 @@ def register():
             checker = 0
         if checker == 1:
             session["token"] = user["localId"]
+            data = {"email": email, "game room": "none", "points": 0}
+            db.child("users").child(session.get("token")).set(data)
             return redirect("/static/main_info")
         else:
             return render_template("static/register_fail.html")
@@ -120,11 +124,17 @@ def main_join():
             token = session.get("token")
             email = session.get("email")
             game_room = request.form["game_room"]
+            session["game_room"] = game_room
             if db.child("rooms").child(game_room).child("started").get().val() == 0:
                 data = {"email": email, "game room": game_room,
                         "points": db.child("users").child(token).child("points").get().val()}
                 db.child(token).set(data)
-                return "<h1>HEllo</h1>"
+                session["q1_num"] = db.child("rooms").child(game_room).child("q1").get().val()
+                session["q2_num"] = db.child("rooms").child(game_room).child("q2").get().val()
+                session["q3_num"] = db.child("rooms").child(game_room).child("q3").get().val()
+                db.child("rooms").child(game_room).child("users_in").update({token: email.split('@')[0]})
+                session["room_admin"] = False
+                return redirect("/static/before_game")
             else:
                 return render_template("static/main_join.html", email = session.get('email').split('@')[0], error = "Wrong Game Room")
 
@@ -148,9 +158,52 @@ def main_create():
             data = {"email": email, "game room": game_room,
                     "points": db.child("users").child(token).child("points").get().val()}
             db.child("users").child(token).set(data)
+
             questions = {"admin": token, "started": 0, "finished": 0, "q1": get_random_int(), "q2": get_random_int(), "q3": get_random_int(), "best score": 1000, "best player": "none"}
             db.child("rooms").child(game_room).set(questions)
-            return "<h1>HEllo</h1>"
 
+            db.child("rooms").child(game_room).child("users_in").update({token: email.split('@')[0]})
+
+            session["game_room"] = game_room
+            session["room_admin"] = True
+            session["q1_num"] = db.child("rooms").child(game_room).child("q1").get().val()
+            session["q2_num"] = db.child("rooms").child(game_room).child("q2").get().val()
+            session["q3_num"] = db.child("rooms").child(game_room).child("q3").get().val()
+            return redirect("/static/before_game")
+
+
+@app.route("/static/before_game", methods=["POST", "GET"])
+def before_game():
+    if session.get("logged_in") == None or session.get("logged_in") == False:
+        return redirect("/static/login")
+    else:
+        if request.method == "GET":
+            if session.get("room_admin") == True:
+                return render_template("static/before_game_admin.html", email=session.get('email').split('@')[0], game_room=session.get("game_room"), token=session.get("token"))
+            else:
+                return render_template("static/before_game_not_admin.html", email=session.get('email').split('@')[0], game_room=session.get("game_room"), token=session.get("token"))
+        else:
+            return redirect("/static/game")
+
+
+@app.route("/static/game", methods=["POST", "GET"])
+def game():
+    if session.get("logged_in") == None or session.get("logged_in") == False:
+        return redirect("/static/login")
+    else:
+        if request.method == "GET":
+            if session.get("room_admin") == True:
+                t = threading.Thread(target=open_room, args=(session.get("game_room"),))
+                t.start()
+            db.child("rooms").child(session.get("game_room")).update({"started":1})
+            q1_num = session.get("q1_num")
+            q2_num = session.get("q2_num")
+            q3_num = session.get("q3_num")
+            q1 = db.child("questions").child("q" + str(q1_num)).child("question").get().val()
+            q2 = db.child("questions").child("q" + str(q2_num)).child("question").get().val()
+            q3 = db.child("questions").child("q" + str(q3_num)).child("question").get().val()
+            return render_template("static/game.html", email = session.get('email').split('@')[0], q1 = q1, q2 = q2, q3 = q3, game_room = session.get("game_room"))
+        else:
+            return "<h1>HEllo</h1>"
 if __name__ == "__main__":
     app.run(host='192.168.1.29', port='12345')

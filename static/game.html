@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Login V1</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--===============================================================================================-->
+	<link rel="icon" type="image/png" href="{{ url_for('static', filename='auth/images/icons/favicon.ico') }}"/>
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='auth/vendor/bootstrap/css/bootstrap.min.css') }}">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='auth/fonts/font-awesome-4.7.0/css/font-awesome.min.css') }}">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='auth/vendor/animate/animate.css') }}">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='auth/vendor/css-hamburgers/hamburgers.min.css') }}">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='auth/vendor/select2/select2.min.css') }}">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='auth/css/util.css') }}">
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='auth/css/main.css') }}">
+<!--===============================================================================================-->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {
+  font-family: "Lato", sans-serif;
+}
+
+.mainBox {
+  width: 960px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 70px 130px 33px 95px;
+  text-align: center;
+}
+
+.sidenav {
+  height: 100%;
+  width: 250px;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: #111;
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 60px;
+}
+
+.sidenav a {
+  padding: 8px 8px 8px 32px;
+  text-decoration: none;
+  font-size: 25px;
+  color: #818181;
+  display: block;
+  transition: 0.3s;
+}
+
+.sidenav a:hover {
+  color: #f1f1f1;
+}
+
+.sidenav .closebtn {
+  position: absolute;
+  top: 0;
+  right: 25px;
+  font-size: 36px;
+  margin-left: 50px;
+}
+
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+</style>
+</head>
+<body>
+	<div class="limiter">
+		<div class="container-login100" style="background: #ff6666">
+			<div id="mySidenav" class="sidenav">
+				<br><br>
+				<div style="width: 250px; font-family:Monospace; font-size: 20px; text-align:center; color:white"><span>{{ email }}</span></div>
+				<br><br><br>
+			  <a href="{{ url_for('static', filename='main_info') }}">User Info</a>
+			  <a href="{{ url_for('static', filename='main_join') }}">Join Room</a>
+			  <a href="{{ url_for('static', filename='main_create') }}">Create Room</a>
+			  <a href="{{ url_for('static', filename='login') }}">Sign Out</a>
+				<br><br><br><br>
+			</div>
+
+
+			<div class="mainBox">
+                <form class="" action="#" method="post">
+                    <h1>Answer The Questions</h1>
+					<h2 style="color: red">Timer:<span id="timer"></span></h2>
+                    <br><br>
+                    <div class="wrap-input100 validate-input"  data-validate = "Valid email is required: ex@abc.xyz">
+                        <span style="display:flex;">
+                        <h3 style="text-align: left; font-size: 2vw">{{ q1 }}:</h3>
+						<input class="input100" style="text-align:center; padding: 0 0 0 0; width:30%;" type="text" name="q1_ans" placeholder="Answer">
+                        </span>
+                        <br><br>
+                        <span style="display:flex;">
+                        <h3 style="text-align: left; font-size: 2vw">{{ q2 }}:</h3>
+						<input class="input100" style="text-align:center; padding: 0 0 0 0; width:30%;" type="text" name="q2_ans" placeholder="Answer">
+                        </span>
+                        <br><br>
+                        <span style="display:flex;">
+                        <h3 style="text-align: left; font-size: 2vw">{{ q3 }}:</h3>
+						<input class="input100" style="text-align:center; padding: 0 0 0 0; width:30%;" type="text" name="q3_ans" placeholder="Answer">
+                        </span>
+						<span class="focus-input100"></span>
+					</div>
+                    <div class="container-login100-form-btn" style="width:100%">
+                        <button class="login100-form-btn" onclick="window.location.href='{{ url_for('static', filename='reset_password') }}'">
+                            Submit
+                        </button>
+                    </div>
+                </form>
+			</div>
+		</div>
+	</div>
+
+
+<!-- Insert these scripts at the bottom of the HTML, but before you use any Firebase services -->
+
+  <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+  <script src="https://www.gstatic.com/firebasejs/7.13.1/firebase-app.js"></script>
+
+  <!-- If you enabled Analytics in your project, add the Firebase SDK for Analytics -->
+  <script src="https://www.gstatic.com/firebasejs/7.13.1/firebase-analytics.js"></script>
+
+  <!-- Add Firebase products that you want to use -->
+  <script src="https://www.gstatic.com/firebasejs/7.13.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.13.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.13.1/firebase-database.js"></script>
+
+<script>
+  // Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: "AIzaSyC3FBTMBznkfl9flr0OGzw4DLpsEMWcbms",
+    authDomain: "cyberproject-5c86e.firebaseapp.com",
+    databaseURL: "https://cyberproject-5c86e.firebaseio.com",
+    projectId: "cyberproject-5c86e",
+    storageBucket: "cyberproject-5c86e.appspot.com",
+    messagingSenderId: "990378544096",
+    appId: "1:990378544096:web:8f088f6dffeb1882fd7985",
+    measurementId: "G-VRMTBMVN04"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  firebase.analytics();
+
+game_room = {{ game_room }}
+var ref = firebase.database().ref().child("rooms").child(game_room).child("timer");
+ref.on('value', function(snapshot) {
+	document.getElementById("timer").innerHTML = snapshot.val()
+});
+</script>
+</body>
+</html>

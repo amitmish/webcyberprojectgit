@@ -76,34 +76,79 @@ body {
 </head>
 <body>
 	<div class="limiter">
-		<div class="container-login100" style="background: #e6e600">
+		<div class="container-login100" style="background: #ff9966">
 			<div id="mySidenav" class="sidenav">
 				<br><br>
 				<div style="width: 250px; font-family:Monospace; font-size: 20px; text-align:center; color:white"><span>{{ email }}</span></div>
 				<br><br><br>
 			  <a href="{{ url_for('static', filename='main_info') }}">User Info</a>
 			  <a href="{{ url_for('static', filename='main_join') }}">Join Room</a>
-			  <a href="{{ url_for('static', filename='main_create') }}" style="color:white">Create Room</a>
+			  <a href="{{ url_for('static', filename='main_create') }}">Create Room</a>
 			  <a href="{{ url_for('static', filename='login') }}">Sign Out</a>
 				<br><br><br><br>
 			</div>
 
 
 			<div class="mainBox">
-				<form class="" action="#" method="post">
-					<h1>Generate New Game Room</h1>
-					<br><br>
-						<div class="container-login100-form-btn" style="width:100%">
-							<button style="background-color:blue" class="login100-form-btn">
-								Generate
-							</button>
-						</div>
-				</form>
+                <form class="" action="#" method="post">
+					<span class="login100-form-title" style="text-align: center">
+						Room PIN: {{ game_room }}
+					</span>
+					<h3 style="text-align:left; color: green;">In Room:</h3>
+					<br>
+					<h4 style="text-align:left; color: purple;" id="in_game_users"></h4>
+                </form>
 			</div>
 		</div>
 	</div>
 
 
 
+  <!-- Insert these scripts at the bottom of the HTML, but before you use any Firebase services -->
+
+  <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+  <script src="https://www.gstatic.com/firebasejs/7.13.1/firebase-app.js"></script>
+
+  <!-- If you enabled Analytics in your project, add the Firebase SDK for Analytics -->
+  <script src="https://www.gstatic.com/firebasejs/7.13.1/firebase-analytics.js"></script>
+
+  <!-- Add Firebase products that you want to use -->
+  <script src="https://www.gstatic.com/firebasejs/7.13.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.13.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.13.1/firebase-database.js"></script>
+
+<script>
+  // Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: "AIzaSyC3FBTMBznkfl9flr0OGzw4DLpsEMWcbms",
+    authDomain: "cyberproject-5c86e.firebaseapp.com",
+    databaseURL: "https://cyberproject-5c86e.firebaseio.com",
+    projectId: "cyberproject-5c86e",
+    storageBucket: "cyberproject-5c86e.appspot.com",
+    messagingSenderId: "990378544096",
+    appId: "1:990378544096:web:8f088f6dffeb1882fd7985",
+    measurementId: "G-VRMTBMVN04"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  firebase.analytics();
+
+game_room = {{ game_room }}
+var ref = firebase.database().ref().child("rooms").child(game_room).child("users_in");
+ref.on('value', function(snapshot) {
+	document.getElementById("in_game_users").innerHTML = ""
+	snapshot.forEach(function(child) {
+    	document.getElementById("in_game_users").innerHTML += child.val() + "<br>";
+	  });
+});
+
+var started = firebase.database().ref().child("rooms").child(game_room).child("started");
+started.on('value', function(snap) {
+    console.log(snap.val());
+    if (snap.val() == 1) {
+        window.location.href='{{ url_for('static', filename='game') }}'
+    }
+});
+</script>
 </body>
 </html>
