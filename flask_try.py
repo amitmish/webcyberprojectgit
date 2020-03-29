@@ -191,6 +191,8 @@ def game():
     if session.get("logged_in") == None or session.get("logged_in") == False:
         return redirect("/static/login")
     else:
+        session["start_time"] = time.time()
+        game_room = session.get("game_room")
         if request.method == "GET":
             if session.get("room_admin") == True:
                 t = threading.Thread(target=open_room, args=(session.get("game_room"),))
@@ -204,6 +206,69 @@ def game():
             q3 = db.child("questions").child("q" + str(q3_num)).child("question").get().val()
             return render_template("static/game.html", email = session.get('email').split('@')[0], q1 = q1, q2 = q2, q3 = q3, game_room = session.get("game_room"))
         else:
-            return "<h1>HEllo</h1>"
+            q1_ans = request.form["q1_ans"]
+            q2_ans = request.form["q2_ans"]
+            q3_ans = request.form["q3_ans"]
+            session["q1_ans"] = q1_ans
+            session["q2_ans"] = q2_ans
+            session["q3_ans"] = q3_ans
+            return redirect("/static/finished")
+
+@app.route("/static/finished")
+def finished():
+    if session.get("logged_in") == None or session.get("logged_in") == False:
+        return redirect("/static/login")
+    else:
+        game_room = session.get("game_room")
+        email = session.get("email")
+        token = session.get("token")
+        end = time.time()
+        countTrue = 0
+        wrongAnswerTime = 0
+        number_of_question_1 = db.child("rooms").child(game_room).child("q1").get().val()
+        number_of_question_2 = db.child("rooms").child(game_room).child("q2").get().val()
+        number_of_question_3 = db.child("rooms").child(game_room).child("q3").get().val()
+        q1_ans = session.get("q1_ans")
+        q2_ans = session.get("q2_ans")
+        q3_ans = session.get("q3_ans")
+        if int(db.child("questions").child("q" + str(number_of_question_1)).child("answer").get().val()) == int(
+                q1_ans):
+            countTrue += 1
+        else:
+            wrongAnswerTime += 7
+        if int(db.child("questions").child("q" + str(number_of_question_2)).child("answer").get().val()) == int(
+                q2_ans):
+            countTrue += 1
+        else:
+            wrongAnswerTime += 7
+        if int(db.child("questions").child("q" + str(number_of_question_3)).child("answer").get().val()) == int(
+                q3_ans):
+            countTrue += 1
+        else:
+            wrongAnswerTime += 7
+        score = int(end - session.get("start_time") + wrongAnswerTime) - int(countTrue)
+        if score < db.child("rooms").child(game_room).child("best score").get().val():
+            db.child("rooms").child(game_room).child("best score").set(score)
+            db.child("rooms").child(game_room).child("best player").set(token)
+        return render_template("static/finished.html", email=session.get('email').split('@')[0], game_room=session.get("game_room"))
+
+
+@app.route("/static/result", methods=["POST", "GET"])
+def result():
+    if session.get("logged_in") == None or session.get("logged_in") == False:
+        return redirect("/static/login")
+    else:
+        if request.method == "GET":
+            game_room = session.get("game_room")
+            token = session.get("token")
+            winnerToken = db.child("rooms").child(game_room).child("best player").get().val()
+            winnerName = db.child("rooms").child(game_room).child("users_in").child(winnerToken).get().val()
+            winnerPoints = db.child("users").child(winnerToken).child("points").get().val()
+            if winnerPoints == None:
+                winnerPoints = 0
+            db.child("users").child(winnerToken).update({"points": winnerPoints + 1})
+            return render_template("static/result.html", email=session.get('email').split('@')[0], game_room = game_room, winner = winnerName)
+        else:
+            return redirect("/static/main_info")
 if __name__ == "__main__":
     app.run(host='192.168.1.29', port='12345')

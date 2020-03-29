@@ -23,13 +23,17 @@ def get_random_int():
     return random.randint(1, 100)
 
 def open_room(game_room):
-    seconds = 60
+    seconds = 15
     while seconds > 0:
         db.child("rooms").child(game_room).update({"timer": seconds})
         time.sleep(1)
         seconds = seconds - 1
     db.child("rooms").child(game_room).update({"finished": 1})
-    time.sleep(15)
+    seconds = 15
+    while seconds > 0:
+        db.child("rooms").child(game_room).update({"finished_timer": seconds})
+        time.sleep(1)
+        seconds = seconds - 1
     db.child("rooms").child(game_room).remove()
 
 def wait_for_start(game_room):
