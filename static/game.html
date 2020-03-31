@@ -151,10 +151,16 @@ body {
   firebase.initializeApp(firebaseConfig);
   firebase.analytics();
 
+function redirect() {
+	window.location.href='{{ url_for('static', filename='finished') }}';
+}
 game_room = {{ game_room }}
 var ref = firebase.database().ref().child("rooms").child(game_room).child("timer");
 ref.on('value', function(snapshot) {
 	document.getElementById("timer").innerHTML = snapshot.val()
+	if (snapshot.val() == 1) {
+		setTimeout(redirect, 2000);
+	    }
 });
 </script>
 </body>
