@@ -41,3 +41,7 @@ def check_admin(email, password):
         return True
     else:
         return False
+
+def add_question_to_db(question, answer, subject):
+    questions_num = len(db.child("questions").child(subject).get().each())
+    db.child("questions").child(subject).child("q" + str(questions_num + 1)).set({"question": question, "answer": int(answer)})

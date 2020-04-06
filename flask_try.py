@@ -176,6 +176,23 @@ def main_create():
             return redirect("/static/before_game")
 
 
+@app.route("/static/add_question", methods=["POST", "GET"])
+def add_question():
+    if session.get("logged_in") == None or session.get("logged_in") == False:
+        return redirect("/static/login")
+    else:
+        if request.method == "GET":
+            return render_template("static/add_question.html", email=session.get('email').split('@')[0], error = "")
+        else:
+            subject = request.form["subject"]
+            answer = request.form["answer"]
+            question = request.form["question"]
+            if subject == "select" or answer == "" or question == "":
+                return render_template("static/add_question.html", email=session.get('email').split('@')[0], error = "Check Inputs")
+            else:
+                add_question_to_db(question, answer, subject)
+                return redirect("/static/main_info")
+
 @app.route("/static/before_game", methods=["POST", "GET"])
 def before_game():
     if session.get("logged_in") == None or session.get("logged_in") == False:
