@@ -85,6 +85,7 @@ body {
 			  <a href="{{ url_for('static', filename='main_join') }}">Join Room</a>
 			  <a href="{{ url_for('static', filename='main_create') }}">Create Room</a>
 			  <a href="{{ url_for('static', filename='add_question') }}">Add A Question</a>
+			  <a href="{{ url_for('static', filename='user_quizzes') }}">My Quizzes</a>
 			  <a href="{{ url_for('static', filename='login') }}">Sign Out</a>
 				<br><br><br><br>
 			</div>
@@ -93,7 +94,7 @@ body {
 			<div class="mainBox">
 				<h1>Welcome, {{ email }}</h1>
 				<br><br>
-				<h3 style="text-align: left; color: #ff5050"><span style="font-size: 25px; color:purple; font-size: 40px">User Info:</span><br><br>Game Room: {{ game_room }}<br><br>Points: {{ points }}</h3>
+				<h3 style="text-align: left; color: #ff5050"><span style="font-size: 25px; color:purple; font-size: 40px">User Info:</span><br><br>Game Room: {{ game_room }}<br><br>Points: {{ points }}<br><br>Quizzes: {{ quizzes }}</h3>
 				<br><br>
 				<div class="container-login100-form-btn" style="width:50%">
 					<button class="login100-form-btn" onclick="window.location.href='{{ url_for('static', filename='reset_password') }}'">

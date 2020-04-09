@@ -72,11 +72,27 @@ body {
   .sidenav {padding-top: 15px;}
   .sidenav a {font-size: 18px;}
 }
+select {
+background-image:url(../images/arrow.png);
+background-repeat:no-repeat;
+background-position:300px;
+width:353px;
+padding:12px;
+margin-top:8px;
+line-height:1;
+border-radius:5px;
+background-color:#6699ff;
+color:#ffffff;
+font-size:20px;
+-webkit-appearance:none;
+box-shadow:inset 0 0 10px 0 rgba(0,0,0,0.6);
+outline:none
+}
 </style>
 </head>
 <body>
 	<div class="limiter">
-		<div class="container-login100" style="background: #ff9966">
+		<div class="container-login100" style="background: #9966ff">
 			<div id="mySidenav" class="sidenav">
 				<br><br>
 				<div style="width: 250px; font-family:Monospace; font-size: 20px; text-align:center; color:white"><span>{{ email }}</span></div>
@@ -85,7 +101,7 @@ body {
 			  <a href="{{ url_for('static', filename='main_join') }}">Join Room</a>
 			  <a href="{{ url_for('static', filename='main_create') }}">Create Room</a>
 			  <a href="{{ url_for('static', filename='add_question') }}">Add A Question</a>
-			  <a href="{{ url_for('static', filename='user_quizzes') }}">My Quizzes</a>
+			  <a href="{{ url_for('static', filename='user_quizzes') }}" style="color:white">My Quizzes</a>
 			  <a href="{{ url_for('static', filename='login') }}">Sign Out</a>
 				<br><br><br><br>
 			</div>
@@ -94,62 +110,39 @@ body {
 			<div class="mainBox">
                 <form class="" action="#" method="post">
 					<span class="login100-form-title" style="text-align: center">
-						Room PIN: {{ game_room }}
+						Create Quiz
 					</span>
-                    <h2>WINNER: {{ winner }}</h2>
-					<br>
-					<h3 id="waiting" style="text-align:left; color: green;">Room Closing In: <span id="timer"></span></h3>
-					<br>
+                    <div class="wrap-input100 validate-input" data-validate = "Valid email is required: ex@abc.xyz" style="justify-content: center;">
+                        <br>
+						<input class="input100" placeholder="Quiz Name" style="text-align:center; padding: 0 0 0 0;background-color: purple; color: white" type="text" name="quiz_name">
+						<span class="focus-input100"></span>
+                        <br>
+						<input class="input100" placeholder="Question" style="text-align:center; padding: 0 0 0 0;background-color: gray; color: white" type="text" name="question1">
+						<span class="focus-input100"></span>
+                        <br>
+						<input class="input100" type="number" style="text-align:center; padding: 0 0 0 0; width: 100%;" name="answer1" placeholder="Answer">
+                        <br>
+						<input class="input100" placeholder="Question" style="text-align:center; padding: 0 0 0 0;background-color: gray; color: white" type="text" name="question2">
+						<span class="focus-input100"></span>
+                        <br>
+						<input class="input100" type="number" style="text-align:center; padding: 0 0 0 0; width: 100%;" name="answer2" placeholder="Answer">
+                        <br>
+						<input class="input100" placeholder="Question" style="text-align:center; padding: 0 0 0 0;background-color: gray; color: white" type="text" name="question3">
+						<span class="focus-input100"></span>
+                        <br>
+						<input class="input100" type="number" style="text-align:center; padding: 0 0 0 0; width: 100%;" name="answer3" placeholder="Answer">
+					</div>
 
-                    <div class="container-login100-form-btn" style="width:100%">
-                        <button class="login100-form-btn" style="color: white; background-color: purple">
-                            Done
-                        </button>
+					<h4 style="text-align:center; color: red;">{{ error }}</h4>
+					<div class="container-login100-form-btn" style="width:100%;">
+						<button style="text-align:center; background-color: yellow; color: black;" class="login100-form-btn">
+							Create Quiz
+						</button>
+					</div>
                 </form>
 			</div>
 		</div>
 	</div>
 
-
-
-  <!-- Insert these scripts at the bottom of the HTML, but before you use any Firebase services -->
-
-  <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
-  <script src="https://www.gstatic.com/firebasejs/7.13.1/firebase-app.js"></script>
-
-  <!-- If you enabled Analytics in your project, add the Firebase SDK for Analytics -->
-  <script src="https://www.gstatic.com/firebasejs/7.13.1/firebase-analytics.js"></script>
-
-  <!-- Add Firebase products that you want to use -->
-  <script src="https://www.gstatic.com/firebasejs/7.13.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/7.13.1/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/7.13.1/firebase-database.js"></script>
-
-<script>
-  // Your web app's Firebase configuration
-  var firebaseConfig = {
-    apiKey: "AIzaSyC3FBTMBznkfl9flr0OGzw4DLpsEMWcbms",
-    authDomain: "cyberproject-5c86e.firebaseapp.com",
-    databaseURL: "https://cyberproject-5c86e.firebaseio.com",
-    projectId: "cyberproject-5c86e",
-    storageBucket: "cyberproject-5c86e.appspot.com",
-    messagingSenderId: "990378544096",
-    appId: "1:990378544096:web:8f088f6dffeb1882fd7985",
-    measurementId: "G-VRMTBMVN04"
-  };
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  firebase.analytics();
-
-game_room = {{ game_room }}
-var ref = firebase.database().ref().child("rooms").child(game_room).child("finished_timer");
-ref.on('value', function(snapshot) {
-	document.getElementById("timer").innerHTML = snapshot.val();
-	if (snapshot.val() == 1) {
-	    window.location.href='{{ url_for('static', filename='main_info') }}';
-	    }
-});
-
-</script>
 </body>
 </html>

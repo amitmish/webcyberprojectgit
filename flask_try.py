@@ -6,6 +6,10 @@ import time
 from server_functions import *
 import thread
 import threading
+import ssl
+
+HOST = "192.168.1.29"
+PORT = "12345"
 
 config = {
     "apiKey": "AIzaSyC3FBTMBznkfl9flr0OGzw4DLpsEMWcbms",
@@ -74,7 +78,7 @@ def register():
             checker = 0
         if checker == 1:
             session["token"] = user["localId"]
-            data = {"email": email, "game room": "none", "points": 0}
+            data = {"email": email, "game room": "none", "points": 0, "quizzes": 0}
             db.child("users").child(session.get("token")).set(data)
             return redirect("/static/main_info")
         else:
@@ -111,7 +115,8 @@ def main_info():
     else:
         game_room = db.child("users").child(session.get('token')).child("game room").get().val()
         points = db.child("users").child(session.get('token')).child("points").get().val()
-        return render_template("static/main_info.html", email = session.get('email').split('@')[0], game_room = game_room, points = points)
+        quizzes = db.child("users").child(session.get('token')).child("quizzes").get().val()
+        return render_template("static/main_info.html", email = session.get('email').split('@')[0], game_room = game_room, points = points, quizzes=quizzes)
 
 @app.route("/static/main_join", methods=["POST", "GET"])
 def main_join():
@@ -128,8 +133,7 @@ def main_join():
             subject = db.child("rooms").child(game_room).child("subject").get().val()
             session["subject"] = subject
             if db.child("rooms").child(game_room).child("started").get().val() == 0:
-                data = {"email": email, "game room": game_room,
-                        "points": db.child("users").child(token).child("points").get().val()}
+                data = {"email": email, "game room": game_room, "points": db.child("users").child(token).child("points").get().val()}
                 db.child("users").child(token).set(data)
                 session["q1_num"] = db.child("rooms").child(game_room).child("q1").get().val()
                 session["q2_num"] = db.child("rooms").child(game_room).child("q2").get().val()
@@ -140,13 +144,62 @@ def main_join():
             else:
                 return render_template("static/main_join.html", email = session.get('email').split('@')[0], error = "Wrong Game Room")
 
-@app.route("/static/main_create", methods=["POST", "GET"])
-def main_create():
+@app.route("/static/main_create/")
+def redirect_main_create():
+    if session.get("logged_in") == None or session.get("logged_in") == False:
+        return redirect("/static/login")
+    return redirect("/static/main_create/none")
+
+
+@app.route("/static/main_create/<quiz_name>", methods=["POST", "GET"])
+def main_create(quiz_name):
     if session.get("logged_in") == None or session.get("logged_in") == False:
         return redirect("/static/login")
     else:
         if request.method == "GET":
-            return render_template("static/main_create.html", email = session.get('email').split('@')[0], error = "")
+            if quiz_name != "none":
+                token = session.get("token")
+                email = session.get("email")
+                game_room = random.randint(1, 10000)
+                found_code = False
+                while found_code == False:
+                    if db.child("rooms").child(game_room).child("started").get().val() == 1:
+                        game_room = random.randint(1, 10000)
+                    else:
+                        found_code = True
+                data = {"email": email, "game room": game_room,
+                        "points": db.child("users").child(token).child("points").get().val()}
+                db.child("users").child(token).set(data)
+                session["subject"] = session.get("token")
+                subject = session.get("subject")
+                q1_num = "q1"
+                q2_num = "q2"
+                q3_num = "q3"
+                question1 = db.child("questions").child(subject).child(quiz_name).child(q1_num).child(
+                    "question").get().val()
+                question2 = db.child("questions").child(subject).child(quiz_name).child(q2_num).child(
+                    "question").get().val()
+                question3 = db.child("questions").child(subject).child(quiz_name).child(q3_num).child(
+                    "question").get().val()
+                answer1 = db.child("questions").child(subject).child(quiz_name).child(q1_num).child(
+                    "answer").get().val()
+                answer2 = db.child("questions").child(subject).child(quiz_name).child(q2_num).child(
+                    "answer").get().val()
+                answer3 = db.child("questions").child(subject).child(quiz_name).child(q3_num).child(
+                    "answer").get().val()
+
+                questions = {"subject": subject, "admin": token, "started": 0, "finished": 0, "question1": question1,
+                             "answer1": answer1, "question2": question2, "answer2": answer2, "question3": question3,
+                             "answer3": answer3, "best score": 1000, "best player": "none"}
+                db.child("rooms").child(game_room).set(questions)
+
+                db.child("rooms").child(game_room).child("users_in").update({token: email.split('@')[0]})
+
+                session["game_room"] = game_room
+                session["room_admin"] = True
+                return redirect("/static/before_game")
+            else:
+                return render_template("static/main_create.html", email = session.get('email').split('@')[0], error = "")
         else:
             session["subject"] = request.form["subject"]
             subject = session.get("subject")
@@ -162,17 +215,22 @@ def main_create():
             data = {"email": email, "game room": game_room,
                     "points": db.child("users").child(token).child("points").get().val()}
             db.child("users").child(token).set(data)
-
-            questions = {"subject": subject, "admin": token, "started": 0, "finished": 0, "q1": get_random_int(subject), "q2": get_random_int(subject), "q3": get_random_int(subject), "best score": 1000, "best player": "none"}
+            q1_num = "q" + str(get_random_int(subject))
+            q2_num = "q" + str(get_random_int(subject))
+            q3_num = "q" + str(get_random_int(subject))
+            question1 = db.child("questions").child(subject).child(q1_num).child("question").get().val()
+            question2 = db.child("questions").child(subject).child(q2_num).child("question").get().val()
+            question3 = db.child("questions").child(subject).child(q3_num).child("question").get().val()
+            answer1 = db.child("questions").child(subject).child(q1_num).child("answer").get().val()
+            answer2 = db.child("questions").child(subject).child(q2_num).child("answer").get().val()
+            answer3 = db.child("questions").child(subject).child(q3_num).child("answer").get().val()
+            questions = {"subject": subject, "admin": token, "started": 0, "finished": 0, "question1": question1, "answer1": answer1, "question2": question2, "answer2": answer2, "question3": question3, "answer3": answer3, "best score": 1000, "best player": "none"}
             db.child("rooms").child(game_room).set(questions)
 
             db.child("rooms").child(game_room).child("users_in").update({token: email.split('@')[0]})
 
             session["game_room"] = game_room
             session["room_admin"] = True
-            session["q1_num"] = db.child("rooms").child(game_room).child("q1").get().val()
-            session["q2_num"] = db.child("rooms").child(game_room).child("q2").get().val()
-            session["q3_num"] = db.child("rooms").child(game_room).child("q3").get().val()
             return redirect("/static/before_game")
 
 
@@ -220,12 +278,9 @@ def game():
                 t = threading.Thread(target=open_room, args=(session.get("game_room"),))
                 t.start()
                 db.child("rooms").child(session.get("game_room")).update({"started":1})
-            q1_num = session.get("q1_num")
-            q2_num = session.get("q2_num")
-            q3_num = session.get("q3_num")
-            q1 = db.child("questions").child(subject).child("q" + str(q1_num)).child("question").get().val()
-            q2 = db.child("questions").child(subject).child("q" + str(q2_num)).child("question").get().val()
-            q3 = db.child("questions").child(subject).child("q" + str(q3_num)).child("question").get().val()
+            q1 = db.child("rooms").child(game_room).child("question1").get().val()
+            q2 = db.child("rooms").child(game_room).child("question2").get().val()
+            q3 = db.child("rooms").child(game_room).child("question3").get().val()
             return render_template("static/game.html", email = session.get('email').split('@')[0], q1 = q1, q2 = q2, q3 = q3, game_room = session.get("game_room"))
         else:
             q1_ans = request.form["q1_ans"]
@@ -248,9 +303,6 @@ def finished():
         end = time.time()
         countTrue = 0
         wrongAnswerTime = 0
-        number_of_question_1 = db.child("rooms").child(game_room).child("q1").get().val()
-        number_of_question_2 = db.child("rooms").child(game_room).child("q2").get().val()
-        number_of_question_3 = db.child("rooms").child(game_room).child("q3").get().val()
         q1_ans = session.get("q1_ans")
         q2_ans = session.get("q2_ans")
         q3_ans = session.get("q3_ans")
@@ -260,17 +312,17 @@ def finished():
             q2_ans = -1
         if q3_ans == "":
             q3_ans = -1
-        if int(db.child("questions").child(subject).child("q" + str(number_of_question_1)).child("answer").get().val()) == int(
+        if int(db.child("rooms").child(game_room).child("answer1").get().val()) == int(
                 q1_ans):
             countTrue += 1
         else:
             wrongAnswerTime += 7
-        if int(db.child("questions").child(subject).child("q" + str(number_of_question_2)).child("answer").get().val()) == int(
+        if int(db.child("rooms").child(game_room).child("answer2").get().val()) == int(
                 q2_ans):
             countTrue += 1
         else:
             wrongAnswerTime += 7
-        if int(db.child("questions").child(subject).child("q" + str(number_of_question_3)).child("answer").get().val()) == int(
+        if int(db.child("rooms").child(game_room).child("answer3").get().val()) == int(
                 q3_ans):
             countTrue += 1
         else:
@@ -302,5 +354,46 @@ def result():
             return render_template("static/result.html", email=session.get('email').split('@')[0], game_room = game_room, winner = winnerName)
         else:
             return redirect("/static/main_info")
+
+@app.route("/static/user_quizzes", methods=["POST", "GET"])
+def user_quizzes():
+    if session.get("logged_in") == None or session.get("logged_in") == False:
+        return redirect("/static/login")
+    else:
+        if request.method == "GET":
+            return render_template("static/user_quizzes.html", email=session.get('email').split('@')[0], token=session.get("token"))
+        else:
+            quiz_name = request.form["quiz_name"]
+            if quiz_name == "create_new_quiz":
+                return redirect("/static/create_quiz")
+            else:
+                return redirect("/static/main_create/" + quiz_name)
+
+
+@app.route("/static/create_quiz", methods=["POST", "GET"])
+def create_quiz():
+    if session.get("logged_in") == None or session.get("logged_in") == False:
+        return redirect("/static/login")
+    else:
+        if request.method == "GET":
+            return render_template("static/create_quiz.html", email=session.get('email').split('@')[0], token=session.get("token"))
+        else:
+            question1 = request.form["question1"]
+            question2 = request.form["question2"]
+            question3 = request.form["question3"]
+            answer1 = request.form["answer1"]
+            answer2 = request.form["answer2"]
+            answer3 = request.form["answer3"]
+            quiz_name = request.form["quiz_name"]
+            user_quizzes = db.child("users").child(session.get('token')).child("quizzes").get().val()
+            email_name = session.get('email').split('@')[0]
+            db.child("questions").child(session.get("token")).child(quiz_name).child("q1").set({"question": question1, "answer": answer1})
+            db.child("questions").child(session.get("token")).child(quiz_name).child("q2").set({"question": question2, "answer": answer2})
+            db.child("questions").child(session.get("token")).child(quiz_name).child("q3").set({"question": question3, "answer": answer3})
+            db.child("users").child(session.get("token")).update({"quizzes": user_quizzes + 1})
+            return redirect("/static/user_quizzes")
+
+
 if __name__ == "__main__":
-    app.run(host='192.168.1.29', port='12345')
+    app.run(host=HOST, port=PORT)
+    #ssl_context=('server.crt', 'server.key')

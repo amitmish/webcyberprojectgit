@@ -72,11 +72,37 @@ body {
   .sidenav {padding-top: 15px;}
   .sidenav a {font-size: 18px;}
 }
+
+.button {
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 16px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+}
+
+.quiz_button {
+  background-color: white;
+  color: black;
+  border: 2px solid #4CAF50;
+}
+
+.quiz_button:hover {
+  background-color: #4CAF50;
+  color: white;
+}
+
 </style>
 </head>
 <body>
 	<div class="limiter">
-		<div class="container-login100" style="background: #ff9966">
+		<div class="container-login100" style="background: #ff6666">
 			<div id="mySidenav" class="sidenav">
 				<br><br>
 				<div style="width: 250px; font-family:Monospace; font-size: 20px; text-align:center; color:white"><span>{{ email }}</span></div>
@@ -85,7 +111,7 @@ body {
 			  <a href="{{ url_for('static', filename='main_join') }}">Join Room</a>
 			  <a href="{{ url_for('static', filename='main_create') }}">Create Room</a>
 			  <a href="{{ url_for('static', filename='add_question') }}">Add A Question</a>
-			  <a href="{{ url_for('static', filename='user_quizzes') }}">My Quizzes</a>
+			  <a href="{{ url_for('static', filename='user_quizzes') }}" style="color:white">My Quizzes</a>
 			  <a href="{{ url_for('static', filename='login') }}">Sign Out</a>
 				<br><br><br><br>
 			</div>
@@ -93,26 +119,22 @@ body {
 
 			<div class="mainBox">
                 <form class="" action="#" method="post">
-					<span class="login100-form-title" style="text-align: center">
-						Room PIN: {{ game_room }}
-					</span>
-                    <h2>WINNER: {{ winner }}</h2>
-					<br>
-					<h3 id="waiting" style="text-align:left; color: green;">Room Closing In: <span id="timer"></span></h3>
-					<br>
-
+                    <h1>Your Quizzes</h1>
+                    <br><br>
+                    <div class="container-login100-form-btn" style="width:100%" id = "quizzes">
+                    </div>
                     <div class="container-login100-form-btn" style="width:100%">
-                        <button class="login100-form-btn" style="color: white; background-color: purple">
-                            Done
+                        <button class="login100-form-btn" name="quiz_name" value="create_new_quiz" onclick="window.location.href='{{ url_for('static', filename='create_quiz') }}'">
+                            Create New Quiz
                         </button>
+                    </div>
                 </form>
 			</div>
 		</div>
 	</div>
 
 
-
-  <!-- Insert these scripts at the bottom of the HTML, but before you use any Firebase services -->
+<!-- Insert these scripts at the bottom of the HTML, but before you use any Firebase services -->
 
   <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
   <script src="https://www.gstatic.com/firebasejs/7.13.1/firebase-app.js"></script>
@@ -141,13 +163,21 @@ body {
   firebase.initializeApp(firebaseConfig);
   firebase.analytics();
 
-game_room = {{ game_room }}
-var ref = firebase.database().ref().child("rooms").child(game_room).child("finished_timer");
+token = "{{token}}"
+var ref = firebase.database().ref().child("questions").child(token);
 ref.on('value', function(snapshot) {
-	document.getElementById("timer").innerHTML = snapshot.val();
-	if (snapshot.val() == 1) {
-	    window.location.href='{{ url_for('static', filename='main_info') }}';
-	    }
+	button_index = 0
+	snapshot.forEach(function(child) {
+		button_index += 1
+		quiz_name = child.key
+		first = "<button style='width:45%' class='button quiz_button' name='quiz_name' id=" + button_index
+		mid2 = ">" + quiz_name
+		mid3 = quiz_name
+		finish = "</button>"
+		button = first + mid2 + finish
+		document.getElementById("quizzes").innerHTML += button + "<br>"
+		document.getElementById(button_index).value = quiz_name
+	});
 });
 
 </script>
