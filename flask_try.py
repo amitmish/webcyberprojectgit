@@ -36,6 +36,10 @@ def home():
 @app.route("/static/login", methods=["POST", "GET"])
 def login():
     if request.method == "POST":
+        session["email"] = ""
+        session["password"] = password
+        session["logged_in"] = False
+        session["token"] = ""
         email = request.form["email"]
         password = request.form["password"]
         checker = 0
@@ -133,7 +137,7 @@ def main_join():
             subject = db.child("rooms").child(game_room).child("subject").get().val()
             session["subject"] = subject
             if db.child("rooms").child(game_room).child("started").get().val() == 0:
-                data = {"email": email, "game room": game_room, "points": db.child("users").child(token).child("points").get().val()}
+                data = {"email": email, "game room": game_room, "points": db.child("users").child(token).child("points").get().val(), "quizzes": db.child("users").child(token).child("quizzes").get().val()}
                 db.child("users").child(token).set(data)
                 session["q1_num"] = db.child("rooms").child(game_room).child("q1").get().val()
                 session["q2_num"] = db.child("rooms").child(game_room).child("q2").get().val()
@@ -168,7 +172,7 @@ def main_create(quiz_name):
                     else:
                         found_code = True
                 data = {"email": email, "game room": game_room,
-                        "points": db.child("users").child(token).child("points").get().val()}
+                        "points": db.child("users").child(token).child("points").get().val(), "quizzes": db.child("users").child(token).child("quizzes").get().val()}
                 db.child("users").child(token).set(data)
                 session["subject"] = session.get("token")
                 subject = session.get("subject")
@@ -213,7 +217,7 @@ def main_create(quiz_name):
                 else:
                     found_code = True
             data = {"email": email, "game room": game_room,
-                    "points": db.child("users").child(token).child("points").get().val()}
+                    "points": db.child("users").child(token).child("points").get().val(), "quizzes": db.child("users").child(token).child("quizzes").get().val()}
             db.child("users").child(token).set(data)
             q1_num = "q" + str(get_random_int(subject))
             q2_num = "q" + str(get_random_int(subject))
@@ -395,5 +399,6 @@ def create_quiz():
 
 
 if __name__ == "__main__":
-    app.run(host=HOST, port=PORT)
-    #ssl_context=('server.crt', 'server.key')
+    context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+    context.load_cert_chain('server.crt', 'server.key')
+    app.run(HOST, PORT, ssl_context=context)
