@@ -108,32 +108,45 @@ outline:none
 
 
 			<div class="mainBox">
-                <form class="" action="#" method="post">
+                <form class="" action="#" method="post" onsubmit="return checkForm()">
 					<span class="login100-form-title" style="text-align: center">
 						Create Quiz
 					</span>
                     <div class="wrap-input100 validate-input" data-validate = "Valid email is required: ex@abc.xyz" style="justify-content: center;">
                         <br>
-						<input class="input100" placeholder="Quiz Name" style="text-align:center; padding: 0 0 0 0;background-color: purple; color: white" type="text" name="quiz_name">
+						<input class="input100" placeholder="Quiz Name (Alphabets Only)" style="text-align:center; padding: 0 0 0 0;background-color: purple; color: white" type="text" name="quiz_name" id="quiz_name">
 						<span class="focus-input100"></span>
                         <br>
-						<input class="input100" placeholder="Question" style="text-align:center; padding: 0 0 0 0;background-color: gray; color: white" type="text" name="question1">
+						<input class="input100" placeholder="Question" style="text-align:center; padding: 0 0 0 0;background-color: gray; color: white" type="text" name="question1" id="question1">
 						<span class="focus-input100"></span>
                         <br>
-						<input class="input100" type="number" style="text-align:center; padding: 0 0 0 0; width: 100%;" name="answer1" placeholder="Answer">
+						<input class="input100" type="number" style="text-align:center; padding: 0 0 0 0; width: 100%;" name="answer1" id="answer1" placeholder="Answer">
                         <br>
-						<input class="input100" placeholder="Question" style="text-align:center; padding: 0 0 0 0;background-color: gray; color: white" type="text" name="question2">
+						<input class="input100" placeholder="Question" style="text-align:center; padding: 0 0 0 0;background-color: gray; color: white" type="text" name="question2" id="question2">
 						<span class="focus-input100"></span>
                         <br>
-						<input class="input100" type="number" style="text-align:center; padding: 0 0 0 0; width: 100%;" name="answer2" placeholder="Answer">
+						<input class="input100" type="number" style="text-align:center; padding: 0 0 0 0; width: 100%;" name="answer2" id="answer2" placeholder="Answer">
                         <br>
-						<input class="input100" placeholder="Question" style="text-align:center; padding: 0 0 0 0;background-color: gray; color: white" type="text" name="question3">
+						<input class="input100" placeholder="Question" style="text-align:center; padding: 0 0 0 0;background-color: gray; color: white" type="text" name="question3" id="question3">
 						<span class="focus-input100"></span>
                         <br>
-						<input class="input100" type="number" style="text-align:center; padding: 0 0 0 0; width: 100%;" name="answer3" placeholder="Answer">
+						<input class="input100" type="number" style="text-align:center; padding: 0 0 0 0; width: 100%;" name="answer3" id="answer3" placeholder="Answer">
+						<br>
+						<input class="input100" placeholder="Question" style="text-align:center; padding: 0 0 0 0;background-color: gray; color: white" type="text" name="question4" id="question4">
+						<span class="focus-input100"></span>
+                        <br>
+						<input class="input100" type="number" style="text-align:center; padding: 0 0 0 0; width: 100%;" name="answer4" id="answer4" placeholder="Answer">
+						<br>
+						<input class="input100" placeholder="Question" style="text-align:center; padding: 0 0 0 0;background-color: gray; color: white" type="text" name="question5" id="question5">
+						<span class="focus-input100"></span>
+                        <br>
+						<input class="input100" type="number" style="text-align:center; padding: 0 0 0 0; width: 100%;" name="answer5" id="answer5" placeholder="Answer">
+
 					</div>
 
-					<h4 style="text-align:center; color: red;">{{ error }}</h4>
+					<h4 style="text-align:center; color: red;" id="errors">{{ error }}</h4>
+
+					<input type="submit" value="Submit">
 					<div class="container-login100-form-btn" style="width:100%;">
 						<button style="text-align:center; background-color: yellow; color: black;" class="login100-form-btn">
 							Create Quiz
@@ -144,5 +157,33 @@ outline:none
 		</div>
 	</div>
 
+<script>
+	function checkForm() {
+		quiz_name = document.getElementById("quiz_name");
+		question1 = document.getElementById("question1").value;
+		question2 = document.getElementById("question2").value;
+		question3 = document.getElementById("question3").value;
+		question4 = document.getElementById("question4").value;
+		question5 = document.getElementById("question5").value;
+		answer1 = document.getElementById("answer1").value;
+		answer2 = document.getElementById("answer2").value;
+		answer3 = document.getElementById("answer3").value;
+		answer4 = document.getElementById("answer4").value;
+		answer5 = document.getElementById("answer5").value;
+    	if (quiz_name == "" || question1 == "" || question2 == "" || question3 == "" || question4 == "" || question5 == "" || answer1 == "" || answer1 == "" || answer2 == "" || answer3 == "" || answer4 == "" || answer5 == "") {
+    		document.getElementById("errors").innerHTML = "Check only Alphabets";
+    		return false;
+    	}
+    	var letters = /^[A-Za-z]+$/;
+    	if (quiz_name.match(letters)) {
+    		return true;
+    	}
+    	else {
+    		document.getElementById("errors").innerHTML = "Check Inputs";
+    		return false;
+    	}
+    	return true;
+	}
+</script>
 </body>
 </html>
