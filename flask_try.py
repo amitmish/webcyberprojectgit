@@ -8,6 +8,9 @@ import thread
 import threading
 import ssl
 
+#for platform identify
+from flask import request
+
 HOST = "192.168.1.29"
 PORT = "12345"
 
@@ -31,7 +34,7 @@ app.secret_key = "any random string"
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    return "hello"
 
 @app.route("/static/login", methods=["POST", "GET"])
 def login():
@@ -59,6 +62,7 @@ def login():
             return render_template("static/login_fail.html")
         #return redirect("/{0}".format(user))
         #return redirect(url_for("user", usr=user))
+        #platform(android/windows = request.user_agent.platform
     else:
         return render_template("static/login.html")
 
@@ -439,7 +443,52 @@ def create_quiz():
             return redirect("/static/user_quizzes")
 
 
+@app.route("/android/login", methods=["POST", "GET"])
+def android_login():
+    session["email"] = ""
+    session["password"] = ""
+    session["logged_in"] = False
+    session["token"] = ""
+    email = request.form["email"]
+    password = request.form["password"]
+    checker = 0
+    try:
+        user = auth.sign_in_with_email_and_password(email, password)
+        session["email"] = email
+        session["password"] = password
+        session["logged_in"] = True
+        checker = 1
+        logged_in = True
+    except:
+        checker = 0
+    if checker == 1:
+        session["token"] = user["localId"]
+        return "true"
+    else:
+        return "false"
+
+@app.route("/android/join", methods=["POST", "GET"])
+def android_join():
+    token = session.get("token")
+    email = session.get("email")
+    game_room = request.form["game_room"]
+    session["game_room"] = game_room
+    subject = db.child("rooms").child(game_room).child("subject").get().val()
+    session["subject"] = subject
+    if db.child("rooms").child(game_room).child("started").get().val() == 0 and db.child("rooms").child(game_room).child("phone").get().val() == 1:
+        data = {"email": email, "game room": game_room,
+                "points": db.child("users").child(token).child("points").get().val(),
+                "quizzes": db.child("users").child(token).child("quizzes").get().val()}
+        db.child("users").child(token).set(data)
+        db.child("rooms").child(game_room).child("users_in").update({token: email.split('@')[0]})
+        session["room_admin"] = False
+        return "true"
+    else:
+        return "false"
+
+
 if __name__ == "__main__":
     context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
     context.load_cert_chain('server.crt', 'server.key')
-    app.run(HOST, PORT, ssl_context=context)
+    app.run(HOST, PORT)
+    #app.run(HOST, PORT, ssl_context=context)
