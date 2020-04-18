@@ -172,9 +172,7 @@ def main_create(quiz_name):
                         game_room = random.randint(1, 10000)
                     else:
                         found_code = True
-                data = {"email": email, "game room": game_room,
-                        "points": db.child("users").child(token).child("points").get().val(), "quizzes": db.child("users").child(token).child("quizzes").get().val()}
-                db.child("users").child(token).set(data)
+
                 session["subject"] = session.get("token")
                 subject = session.get("subject")
                 q1_num = "q1"
@@ -208,7 +206,10 @@ def main_create(quiz_name):
                              "answer3": answer3, "question4": question4, "answer4": answer4, "question5": question5, "answer5": answer5, "best score": 1000, "best player": "none"}
                 db.child("rooms").child(game_room).set(questions)
 
-                db.child("rooms").child(game_room).child("users_in").update({token: email.split('@')[0]})
+                data = {"email": email, "game room": game_room,
+                        "points": db.child("users").child(token).child("points").get().val(),
+                        "quizzes": db.child("users").child(token).child("quizzes").get().val()}
+                db.child("users").child(token).set(data)
 
                 session["game_room"] = game_room
                 session["room_admin"] = True
@@ -227,9 +228,7 @@ def main_create(quiz_name):
                     game_room = random.randint(1, 10000)
                 else:
                     found_code = True
-            data = {"email": email, "game room": game_room,
-                    "points": db.child("users").child(token).child("points").get().val(), "quizzes": db.child("users").child(token).child("quizzes").get().val()}
-            db.child("users").child(token).set(data)
+
             q1_num = "q" + str(get_random_int(subject))
             q2_num = "q" + str(get_random_int(subject))
             q3_num = "q" + str(get_random_int(subject))
@@ -248,7 +247,10 @@ def main_create(quiz_name):
             questions = {"subject": subject, "admin": token, "started": 0, "finished": 0, "question1": question1, "answer1": answer1, "question2": question2, "answer2": answer2, "question3": question3, "answer3": answer3, "question4": question4, "answer4": answer4, "question5": question5, "answer5": answer5, "best score": 1000, "best player": "none"}
             db.child("rooms").child(game_room).set(questions)
 
-            db.child("rooms").child(game_room).child("users_in").update({token: email.split('@')[0]})
+            data = {"email": email, "game room": game_room,
+                    "points": db.child("users").child(token).child("points").get().val(),
+                    "quizzes": db.child("users").child(token).child("quizzes").get().val()}
+            db.child("users").child(token).set(data)
 
             session["game_room"] = game_room
             session["room_admin"] = True
@@ -305,13 +307,24 @@ def game():
             q4 = db.child("rooms").child(game_room).child("question4").get().val()
             q5 = db.child("rooms").child(game_room).child("question5").get().val()
 
-            return render_template("static/game.html", email = session.get('email').split('@')[0], q1 = q1, q2 = q2, q3 = q3, q4 = q4, q5 = q5, game_room = session.get("game_room"))
+            if session.get("room_admin" == False):
+                return render_template("static/game.html", email = session.get('email').split('@')[0], q1 = q1, q2 = q2, q3 = q3, q4 = q4, q5 = q5, game_room = session.get("game_room"))
+            else:
+                return render_template("static/game_hoster.html", email = session.get('email').split('@')[0], q1 = q1, q2 = q2, q3 = q3, q4 = q4, q5 = q5, game_room = session.get("game_room"))
+
         else:
-            q1_ans = request.form["q1_ans"]
-            q2_ans = request.form["q2_ans"]
-            q3_ans = request.form["q3_ans"]
-            q4_ans = request.form["q4_ans"]
-            q5_ans = request.form["q5_ans"]
+            if session.get("room_admin") == False:
+                q1_ans = request.form["q1_ans"]
+                q2_ans = request.form["q2_ans"]
+                q3_ans = request.form["q3_ans"]
+                q4_ans = request.form["q4_ans"]
+                q5_ans = request.form["q5_ans"]
+            else:
+                q1_ans = ""
+                q2_ans = ""
+                q3_ans = ""
+                q4_ans = ""
+                q5_ans = ""
             session["q1_ans"] = q1_ans
             session["q2_ans"] = q2_ans
             session["q3_ans"] = q3_ans
@@ -445,46 +458,90 @@ def create_quiz():
 
 @app.route("/android/login", methods=["POST", "GET"])
 def android_login():
-    session["email"] = ""
-    session["password"] = ""
-    session["logged_in"] = False
-    session["token"] = ""
     email = request.form["email"]
     password = request.form["password"]
     checker = 0
     try:
         user = auth.sign_in_with_email_and_password(email, password)
-        session["email"] = email
-        session["password"] = password
-        session["logged_in"] = True
         checker = 1
-        logged_in = True
     except:
         checker = 0
     if checker == 1:
-        session["token"] = user["localId"]
         return "true"
     else:
         return "false"
 
 @app.route("/android/join", methods=["POST", "GET"])
 def android_join():
-    token = session.get("token")
-    email = session.get("email")
+    email = request.form["email"]
+    password = request.form["password"]
+    token = auth.sign_in_with_email_and_password(email, password)["localId"]
     game_room = request.form["game_room"]
-    session["game_room"] = game_room
-    subject = db.child("rooms").child(game_room).child("subject").get().val()
-    session["subject"] = subject
-    if db.child("rooms").child(game_room).child("started").get().val() == 0 and db.child("rooms").child(game_room).child("phone").get().val() == 1:
+    if db.child("rooms").child(game_room).child("started").get().val() == 0:
         data = {"email": email, "game room": game_room,
                 "points": db.child("users").child(token).child("points").get().val(),
                 "quizzes": db.child("users").child(token).child("quizzes").get().val()}
         db.child("users").child(token).set(data)
         db.child("rooms").child(game_room).child("users_in").update({token: email.split('@')[0]})
-        session["room_admin"] = False
+        session["start_time"] = time.time()
         return "true"
     else:
         return "false"
+
+@app.route("/android/game", methods=["POST", "GET"])
+def android_game():
+    game_room = request.form["game_room"]
+    email = request.form["email"]
+    password = request.form["password"]
+    token = auth.sign_in_with_email_and_password(email, password)["localId"]
+    end = time.time()
+    countTrue = 0
+    wrongAnswerTime = 0
+    q1_ans = request.form["ans1"]
+    q2_ans = request.form["ans2"]
+    q3_ans = request.form["ans3"]
+    q4_ans = request.form["ans4"]
+    q5_ans = request.form["ans5"]
+    if q1_ans == "":
+        q1_ans = -1
+    if q2_ans == "":
+        q2_ans = -1
+    if q3_ans == "":
+        q3_ans = -1
+    if q4_ans == "":
+        q4_ans = -1
+    if q5_ans == "":
+        q5_ans = -1
+    if int(db.child("rooms").child(game_room).child("answer1").get().val()) == int(
+            q1_ans):
+        countTrue += 2
+    else:
+        wrongAnswerTime += 1
+    if int(db.child("rooms").child(game_room).child("answer2").get().val()) == int(
+            q2_ans):
+        countTrue += 2
+    else:
+        wrongAnswerTime += 1
+    if int(db.child("rooms").child(game_room).child("answer3").get().val()) == int(
+            q3_ans):
+        countTrue += 2
+    else:
+        wrongAnswerTime += 1
+    if int(db.child("rooms").child(game_room).child("answer4").get().val()) == int(
+            q4_ans):
+        countTrue += 2
+    else:
+        wrongAnswerTime += 1
+    if int(db.child("rooms").child(game_room).child("answer5").get().val()) == int(
+            q5_ans):
+        countTrue += 2
+    else:
+        wrongAnswerTime += 1
+    score = int(countTrue - wrongAnswerTime)
+    if score < db.child("rooms").child(game_room).child("best score").get().val():
+        db.child("rooms").child(game_room).child("best score").set(score)
+        db.child("rooms").child(game_room).child("best player").set(token)
+    return "response doesnt matters"
 
 
 if __name__ == "__main__":
