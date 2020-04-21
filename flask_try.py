@@ -307,7 +307,7 @@ def game():
             q4 = db.child("rooms").child(game_room).child("question4").get().val()
             q5 = db.child("rooms").child(game_room).child("question5").get().val()
 
-            if session.get("room_admin" == False):
+            if session.get("room_admin") == False:
                 return render_template("static/game.html", email = session.get('email').split('@')[0], q1 = q1, q2 = q2, q3 = q3, q4 = q4, q5 = q5, game_room = session.get("game_room"))
             else:
                 return render_template("static/game_hoster.html", email = session.get('email').split('@')[0], q1 = q1, q2 = q2, q3 = q3, q4 = q4, q5 = q5, game_room = session.get("game_room"))
