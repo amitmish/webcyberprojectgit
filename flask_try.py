@@ -110,7 +110,7 @@ def reset_password():
         except:
             checker = 0
         if checker == 1:
-            return "<h1>HEllo</h1>"
+            return redirect("/static/login")
         else:
             return render_template("static/reset_password_fail.html")
     else:
@@ -310,26 +310,19 @@ def game():
             if session.get("room_admin") == False:
                 return render_template("static/game.html", email = session.get('email').split('@')[0], q1 = q1, q2 = q2, q3 = q3, q4 = q4, q5 = q5, game_room = session.get("game_room"))
             else:
+                session["q1_ans"] = ""
+                session["q2_ans"] = ""
+                session["q3_ans"] = ""
+                session["q4_ans"] = ""
+                session["q5_ans"] = ""
                 return render_template("static/game_hoster.html", email = session.get('email').split('@')[0], q1 = q1, q2 = q2, q3 = q3, q4 = q4, q5 = q5, game_room = session.get("game_room"))
 
         else:
-            if session.get("room_admin") == False:
-                q1_ans = request.form["q1_ans"]
-                q2_ans = request.form["q2_ans"]
-                q3_ans = request.form["q3_ans"]
-                q4_ans = request.form["q4_ans"]
-                q5_ans = request.form["q5_ans"]
-            else:
-                q1_ans = ""
-                q2_ans = ""
-                q3_ans = ""
-                q4_ans = ""
-                q5_ans = ""
-            session["q1_ans"] = q1_ans
-            session["q2_ans"] = q2_ans
-            session["q3_ans"] = q3_ans
-            session["q4_ans"] = q4_ans
-            session["q5_ans"] = q5_ans
+            session["q1_ans"] = request.form["q1_ans"]
+            session["q2_ans"] = request.form["q2_ans"]
+            session["q3_ans"] = request.form["q3_ans"]
+            session["q4_ans"] = request.form["q4_ans"]
+            session["q5_ans"] = request.form["q5_ans"]
             return redirect("/static/finished")
 
 @app.route("/static/finished")
@@ -361,30 +354,30 @@ def finished():
             q5_ans = -1
         if int(db.child("rooms").child(game_room).child("answer1").get().val()) == int(
                 q1_ans):
-            countTrue += 1
+            countTrue += 2
         else:
-            wrongAnswerTime += 7
+            wrongAnswerTime += 1
         if int(db.child("rooms").child(game_room).child("answer2").get().val()) == int(
                 q2_ans):
-            countTrue += 1
+            countTrue += 2
         else:
-            wrongAnswerTime += 7
+            wrongAnswerTime += 1
         if int(db.child("rooms").child(game_room).child("answer3").get().val()) == int(
                 q3_ans):
-            countTrue += 1
+            countTrue += 2
         else:
-            wrongAnswerTime += 7
+            wrongAnswerTime += 1
         if int(db.child("rooms").child(game_room).child("answer4").get().val()) == int(
                 q4_ans):
-            countTrue += 1
+            countTrue += 2
         else:
-            wrongAnswerTime += 7
+            wrongAnswerTime += 1
         if int(db.child("rooms").child(game_room).child("answer5").get().val()) == int(
                 q5_ans):
-            countTrue += 1
+            countTrue += 2
         else:
-            wrongAnswerTime += 7
-        score = int(end - session.get("start_time") + wrongAnswerTime) - int(countTrue)
+            wrongAnswerTime += 1
+        score = int(countTrue - wrongAnswerTime)
         if score < db.child("rooms").child(game_room).child("best score").get().val():
             db.child("rooms").child(game_room).child("best score").set(score)
             db.child("rooms").child(game_room).child("best player").set(token)
